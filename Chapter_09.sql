@@ -7,25 +7,31 @@
 
 
 
------------------------------------------------------------
---EXAPMPLE
------------------------------------------------------------
+------------------------------------------------------------------
+    I N T E R N A L  P R O B L E M S
+------------------------------------------------------------------
 use SalesOrdersExample;
------------------------------------------------------------
+------------------------------------------------------------------
 select distinct Products.ProductNumber, ProductName
 from
     Products
 left join
     Order_Details
     on Products.ProductNumber = Order_Details.ProductNumber
-where Order_Details.OrderNumber is null;
------------------------------------------------------------
-select concat(C.CustFirstName, ' ', C.CustLastName) as Customers, bi.ProductName, bi.OrderDate, bi.QuotedPrice, bi.QuantityOrdered
+where
+    Order_Details.OrderNumber is null;
+------------------------------------------------------------------
+select
+    concat(C.CustFirstName, ' ', C.CustLastName) as Customers,
+    bi.ProductName, bi.OrderDate, bi.QuotedPrice,
+    bi.QuantityOrdered
 from
     Customers C
 left join
 (
-    select O.CustomerID, O.OrderDate, OD.QuotedPrice, OD.QuantityOrdered, P.ProductName
+    select
+        O.CustomerID, O.OrderDate,
+        OD.QuotedPrice, OD.QuantityOrdered, P.ProductName
     from
         Orders O
     inner join
@@ -37,26 +43,32 @@ left join
     inner join
         Categories Ca
         on Ca.CategoryID = P.CategoryID
-    where Ca.CategoryDescription = 'Bikes'
+    where
+        Ca.CategoryDescription = 'Bikes'
 ) as bi
     on C.CustomerID = bi.CustomerID;
------------------------------------------------------------
+------------------------------------------------------------------
 use EntertainmentAgencyExample;
------------------------------------------------------------
-select EntStageName
+------------------------------------------------------------------
+select
+    EntStageName
 from
     Entertainers
 left join
     Engagements
     on Entertainers.EntertainerID = Engagements.EntertainerID
-where Engagements.EntertainerID is NULL;
------------------------------------------------------------
-select Ct.Name, Ms.StyleName
+where
+    Engagements.EntertainerID is NULL;
+------------------------------------------------------------------
+select
+    Ct.Name, Ms.StyleName
 from
     Musical_Styles as Ms
-    left outer join
+left outer join
     (
-        select concat(C.CustFirstName, ' ', C.CustLastName) as Name, MP.StyleID
+        select
+            concat(C.CustFirstName, ' ', C.CustLastName) as Name,
+            MP.StyleID
         from
             Customers as C
         inner join
@@ -67,34 +79,43 @@ from
 ----------------------------------------------------------
 use SchoolSchedulingExample;
 ----------------------------------------------------------
-select concat(S.StfFirstName, ' ', S.StfLastname) as Name
+select
+    concat(S.StfFirstName, ' ', S.StfLastname) as Name
 from
     Staff S
 left join
     Faculty_Classes FC
     on FC.StaffID = S.StaffID
-where FC.StaffID is null;
+where
+    FC.StaffID is null;
 ----------------------------------------------------------
-select concat(s.StudFirstName, ' ', s.StudLastName) as Name
+select
+    concat(s.StudFirstName, ' ', s.StudLastName) as Name
 from
     Students as s
 left join
     (
-        select ss.StudentID
+        select
+            ss.StudentID
         from
             Student_Schedules as ss
         inner join
             Student_Class_Status as scs
             on ss.ClassStatus = scs.ClassStatus
-        where scs.ClassStatusDescription = 'Withdrew'
+        where
+            scs.ClassStatusDescription = 'Withdrew'
     ) as wid
     on wid.StudentID = s.StudentID
-where wid.StudentID is null;
+where
+    wid.StudentID is null;
 ----------------------------------------------------------
-select sc.CategoryDescription, sc.SubjectName, Cl.ClassRoomID, Cl.StartDate, Cl.StartTime, Cl.Duration
+select
+    sc.CategoryDescription, sc.SubjectName,
+    Cl.ClassRoomID, Cl.StartDate, Cl.StartTime, Cl.Duration
 from
     (
-        select C.CategoryDescription, S.SubjectID, S.SubjectName
+        select
+            C.CategoryDescription, S.SubjectID, S.SubjectName
         from
             Categories as C
         left join
@@ -107,20 +128,27 @@ left join
 ----------------------------------------------------------
 use BowlingLeagueExample;
 ----------------------------------------------------------
-select T.TourneyID, T.TourneyDate, T.TourneyLocation
+select
+    T.TourneyID, T.TourneyDate, T.TourneyLocation
 from
     Tournaments as T
-    left join
+left join
     Tourney_Matches as TM
     on T.TourneyID = TM.TourneyID
-where TM.TourneyID is null;
+where
+    TM.TourneyID is null;
 ----------------------------------------------------------
-select concat(B.BowlerFirstName, " ", B.BowlerLastName) as Bowlers, BB.TourneyLocation as 'Location',  BB.TourneyDate as 'Date', BB.MatchID as MatchID, BB.RawScore as "Raw Score"
+select
+    concat(B.BowlerFirstName, " ", B.BowlerLastName) as Bowlers,
+    BB.TourneyLocation as 'Location',  BB.TourneyDate as 'Date',
+    BB.MatchID as MatchID, BB.RawScore as "Raw Score"
 from
     Bowlers B
 left join
     (
-        select BS.MatchID, BS.BowlerID, BS.RawScore, T.TourneyDate, T.TourneyLocation
+        select
+            BS.MatchID, BS.BowlerID, BS.RawScore,
+            T.TourneyDate, T.TourneyLocation
         from
             Bowler_Scores as BS
         inner join
@@ -129,19 +157,22 @@ left join
         inner join
             Tournaments as T
             on T.TourneyID = TM.TourneyID
-        where BS.RawScore > 180
+        where
+            BS.RawScore > 180
     ) as BB
     on BB.BowlerID = B.BowlerID;
 ----------------------------------------------------------
 use RecipesExample;
 ----------------------------------------------------------
-select I.IngredientName
+select
+    I.IngredientName
 from
     Ingredients I
 left join
     Recipe_Ingredients RI
     on I.IngredientID = RI.IngredientID
-where RI.IngredientID is null;
+where
+    RI.IngredientID is null;
 ----------------------------------------------------------
 ???????
 ----------------------------------------------------------
@@ -149,7 +180,8 @@ where RI.IngredientID is null;
 ----------------------------------------------------------
 use SalesOrdersExample;
 ----------------------------------------------------------
-select concat(C.CustFirstName, " ", C.CustLastName) as Customer
+select
+    concat(C.CustFirstName, " ", C.CustLastName) as Customer
 from
     Customers C
 left outer join
@@ -163,16 +195,21 @@ left outer join
         inner join
             Products P
             on P.ProductNumber = OD.ProductNumber
-        where P.ProductName like "%Helmet%"
+        where
+            P.ProductName like "%Helmet%"
     ) OH
     on OH.CustomerID = C.CustomerID
-where OH.CustomerID is null;
+where
+    OH.CustomerID is null;
 ----------------------------------------------------------
 ----output 27 rows, but book say there is 18 rows.
-select distinct C.CustomerID, C.Customer, C.CustZipCode
+select distinct
+    C.CustomerID, C.Customer, C.CustZipCode
 from
     (
-        select concat(CC.CustFirstName, " ", CC.CustLastName) as Customer, O.EmployeeID, CC.CustomerID, CC.CustZipCode
+        select
+            concat(CC.CustFirstName, " ", CC.CustLastName) as Customer,
+            O.EmployeeID, CC.CustomerID, CC.CustZipCode
         from
             Customers CC
         inner join
@@ -186,7 +223,8 @@ where
     E.EmpZipCode <> C.CustZipCode;
 ----------------------------------------------------------
 -- OUTPUT 3973 rows, but books says 2681 rows
-select PO.ProductNumber, PO.ProductName, O.OrderDate
+select
+    PO.ProductNumber, PO.ProductName, O.OrderDate
 from
     Orders O
 left join
@@ -199,20 +237,25 @@ left join
             on OD.ProductNumber = P.ProductNumber
     ) PO
     on PO.OrderNumber = O.OrderNumber
-where PO.OrderNumber is not null
-order by PO.ProductNumber, PO.ProductName, O.OrderDate;
+where
+    PO.OrderNumber is not null
+order by
+    PO.ProductNumber, PO.ProductName, O.OrderDate;
 ----------------------------------------------------------
 use EntertainmentAgencyExample;
 ----------------------------------------------------------
-select A.AgtLastName, A.AgtFirstName
+select
+    A.AgtLastName, A.AgtFirstName
 from
     Agents A
 left join
     Engagements EA
     on A.AgentID = EA.AgentID
-where EA.AgentID is null;
+where E
+    A.AgentID is null;
 ----------------------------------------------------------
-select C.CustLastName, C.CustFirstName
+select
+    C.CustLastName, C.CustFirstName
 from
     Customers C
 left join
@@ -221,7 +264,8 @@ left join
 where
     E.CustomerID is null;
 ----------------------------------------------------------
-select EntStageName, Engagements.EngagementNumber
+select
+    EntStageName, Engagements.EngagementNumber
 from
     Entertainers
 left join
@@ -230,10 +274,13 @@ left join
 ----------------------------------------------------------
 use SchoolSchedulingExample;
 ----------------------------------------------------------
-select SC.SubjectName, SC.ClassRoomID, SC.StartTime, SC.Duration
+select
+    SC.SubjectName, SC.ClassRoomID, SC.StartTime, SC.Duration
 from
     (
-        select Su.SubjectName, S.ClassRoomID, S.StartTime, S.Duration, S.ClassID
+        select
+            Su.SubjectName, S.ClassRoomID,
+            S.StartTime, S.Duration, S.ClassID
         from
             Subjects Su
         inner join
@@ -242,21 +289,26 @@ from
     ) SC
 left join
     (
-        select SS.ClassID
+        select
+            SS.ClassID
         from
             Student_Schedules SS
         inner join
             Student_Class_Status SCS
             on SS.ClassStatus = SCS.ClassStatus
-        where SCS.ClassStatus = 1
+        where
+            SCS.ClassStatus = 1
     ) as SE
     on SE.ClassID = SC.ClassID
-where SE.ClassID is null;
-------------------------------------------------------------
-select distinct SC.SubjectName
+where
+    SE.ClassID is null;
+-------------------------------------------------------------------
+select distinct
+    SC.SubjectName
 from
     (
-        select C.ClassID, S.SubjectName
+        select
+            C.ClassID, S.SubjectName
         from
             Subjects S
         inner join
@@ -266,14 +318,17 @@ from
 left join
     Faculty_Classes FC
     on FC.ClassID = SC.ClassID
-where FC.ClassID is null;
-------------------------------------------------------------
-select S.StudLastName, S.StudFirstName
+where
+    FC.ClassID is null;
+-------------------------------------------------------------------
+select
+    S.StudLastName, S.StudFirstName
 from
     Students S
 left join
     (
-        select ST.StudentID
+        select
+            ST.StudentID
         from
             Students ST
         left join
@@ -282,18 +337,21 @@ left join
         left join
             Student_Class_Status SCS
             on SS.ClassStatus = SCS.ClassStatus
-        where SCS.ClassStatus = 1
+        where
+            SCS.ClassStatus = 1
     ) SSS
     on S.StudentID = SSS.StudentID
 where
     SSS.StudentID is null;
-------------------------------------------------------------
-select S.StaffID, S.StfFirstName, S.StfLastname, CFC.ClassID
+-------------------------------------------------------------------
+select
+    S.StaffID, S.StfFirstName, S.StfLastname, CFC.ClassID
 from
     Staff S
 left join
     (
-        select FC.StaffID, C.ClassID
+        select
+            FC.StaffID, C.ClassID
         from
             Faculty_Classes FC
         inner join
@@ -301,13 +359,15 @@ left join
             on C.ClassID = FC.ClassID
     )  CFC
     on S.StaffID = CFC.StaffID;
-------------------------------------------------------------
+-------------------------------------------------------------------
 use BowlingLeagueExample;
-------------------------------------------------------------
+-------------------------------------------------------------------
 ???
---------------------------------------------------------------
+---------------------------------------------------------------------
 --Getting 169 rows, but book says 176 rows
-select  TM.TourneyID, T.TourneyDate, T.TourneyLocation, MG.MatchID, MG.GameNumber, MG.WinningTeamID
+select
+    TM.TourneyID, T.TourneyDate, T.TourneyLocation,
+    MG.MatchID, MG.GameNumber, MG.WinningTeamID
 from
     Tourney_Matches TM
 left join
@@ -316,17 +376,19 @@ left join
 left join
     Match_Games MG
     on TM.MatchID = MG.MatchID;
-------------------------------------------------------------
+-------------------------------------------------------------------
 use RecipesExample;
-------------------------------------------------------------
+-------------------------------------------------------------------
 ???
-------------------------------------------------------------
-select I.IngredientName, RR.RecipeTitle
+-------------------------------------------------------------------
+select
+    I.IngredientName, RR.RecipeTitle
 from
     Ingredients I
 left join
     (
-        select R.RecipeTitle, R.RecipeID, RI.IngredientID
+        select
+            R.RecipeTitle, R.RecipeID, RI.IngredientID
         from
             Recipes R
         inner join
@@ -334,19 +396,24 @@ left join
             on R.RecipeID = RI.RecipeID
     ) RR
     on I.IngredientID = RR.IngredientID;
-------------------------------------------------------------
-select RC.RecipeClassDescription, R.RecipeTitle
+-------------------------------------------------------------------
+select
+    RC.RecipeClassDescription, R.RecipeTitle
 from
     Recipe_Classes RC
 left join
     Recipes R
     on R.RecipeClassID = RC.RecipeClassID
-where RC.RecipeClassID in (1,4,7);
-------------------------------------------------------------
-select RC.RecipeClassDescription, R.RecipeTitle
+where
+    RC.RecipeClassID in (1,4,7);
+-------------------------------------------------------------------
+select
+    RC.RecipeClassDescription, R.RecipeTitle
 from
     Recipe_Classes RC
 left join
     Recipes R
     on R.RecipeClassID = RC.RecipeClassID;
-------------------------------------------------------------
+------------------------------------------------------------------
+                        T H E  E N D
+------------------------------------------------------------------
