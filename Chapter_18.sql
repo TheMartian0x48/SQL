@@ -508,16 +508,365 @@ where
 “Find all the customers who have not ordered either bikes or
 tires.”
 */
-
+/*
+using outer join
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+left join
+    (
+    select
+        O.CustomerID
+    from
+        Orders O
+    inner join
+        Order_Details OD
+        on OD.OrderNumber = O.OrderNumber
+    inner join
+        Products P
+        on P.ProductNumber = OD.ProductNumber
+    inner join
+        Categories CC
+        on CC.CategoryID = P.CategoryID
+    where
+        CC.CategoryDescription in ('Bikes', 'Tires')
+    ) BT
+    on BT.CustomerID = C.CustomerID
+where
+    BT.CustomerID is null;
+/*
+using not in
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+where
+    C.CustomerID not in (
+    select
+        O.CustomerID
+    from
+        Orders O
+    inner join
+        Order_Details OD
+        on OD.OrderNumber = O.OrderNumber
+    inner join
+        Products P
+        on P.ProductNumber = OD.ProductNumber
+    inner join
+        Categories CC
+        on CC.CategoryID = P.CategoryID
+    where
+        CC.CategoryDescription in ('Bikes', 'Tires')
+    );
+/*
+using exists
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+where
+    not exists(
+    select
+        *
+    from
+        Orders O
+    inner join
+        Order_Details OD
+        on OD.OrderNumber = O.OrderNumber
+    inner join
+        Products P
+        on P.ProductNumber = OD.ProductNumber
+    inner join
+        Categories CC
+        on CC.CategoryID = P.CategoryID
+    where
+        CC.CategoryDescription in ('Bikes', 'Tires')
+        and
+        O.CustomerID = C.CustomerID
+    );
 -----------------------------------------------------------------
-
+use EntertainmentAgencyExample;
 -----------------------------------------------------------------
-
+/*
+“List the entertainers who played engagements for customers Berg
+and Hallmark.”
+*/
+/*
+using join
+*/
+select distinct
+    EC1.EntertainerID,
+    EC1.EntStageName
+from
+    (
+        select
+            E1.EntertainerID,
+            E1.EntStageName
+        from
+            Entertainers E1
+        inner join
+            Engagements EN1
+            on E1.EntertainerID = EN1.EntertainerID
+        inner join
+            Customers C1
+            on C1.CustomerID = EN1.CustomerID
+        where
+            C1.CustLastName = 'Berg'
+    ) EC1
+inner join
+    (
+        select
+            E2.EntertainerID,
+            E2.EntStageName
+        from
+            Entertainers E2
+        inner join
+            Engagements EN2
+            on E2.EntertainerID = EN2.EntertainerID
+        inner join
+            Customers C2
+            on C2.CustomerID = EN2.CustomerID
+        where
+            C2.CustLastName = 'Hallmark'
+    ) EC2
+    on EC1.EntertainerID = EC2.EntertainerID;
+/*
+using exist
+*/
+select
+    E.EntertainerID,
+    E.EntStageName
+from
+    Entertainers E
+where
+    exists
+    (
+        select
+            *
+        from
+            Engagements EN1
+        inner join
+            Customers C1
+            on C1.CustomerID = EN1.CustomerID
+        where
+            C1.CustLastName = 'Berg'
+            and
+            EN1.EntertainerID = E.EntertainerID
+    )
+    and
+    exists
+    (
+        select
+            *
+        from
+            Engagements EN2
+        inner join
+            Customers C2
+            on C2.CustomerID = EN2.CustomerID
+        where
+            C2.CustLastName = 'Hallmark'
+            and
+            EN2.EntertainerID = E.EntertainerID
+    );
+/*
+using in
+*/
+select
+    E.EntertainerID,
+    E.EntStageName
+from
+    Entertainers E
+where
+    E.EntertainerID in
+    (
+        select
+            EN1.EntertainerID
+        from
+            Engagements EN1
+        inner join
+            Customers C1
+            on C1.CustomerID = EN1.CustomerID
+        where
+            C1.CustLastName = 'Berg'
+    )
+    and
+    E.EntertainerID in
+    (
+        select
+            EN2.EntertainerID
+        from
+            Engagements EN2
+        inner join
+            Customers C2
+            on C2.CustomerID = EN2.CustomerID
+        where
+            C2.CustLastName = 'Hallmark'
+    );
 -----------------------------------------------------------------
-
+/*
+“Display agents who have never booked a Country or Country Rock
+group.”
+*/
+/*
+using join
+*/
+select
+    A.AgentID,
+    A.AgtFirstName,
+    A.AgtLastName
+from
+    Agents A
+left join
+    (
+        select
+            E.AgentID
+        from
+            Engagements E
+        inner join
+            Entertainers EN
+            on E.EntertainerID = EN.EntertainerID
+        inner join
+            Entertainer_Styles ES
+            on ES.EntertainerID = EN.EntertainerID
+        inner join
+            Musical_Styles MS
+            on MS.StyleID = ES.StyleID
+        where
+            MS.StyleName in ('Country', 'Country Rock')
+    )CCR
+    on CCR.AgentID = A.AgentID
+where
+    CCR.AgentID is null;
+/*
+using not in
+*/
+select
+    A.AgentID,
+    A.AgtFirstName,
+    A.AgtLastName
+from
+    Agents A
+where
+    A.AgentID not in
+    (
+        select
+            E.AgentID
+        from
+            Engagements E
+        inner join
+            Entertainers EN
+            on E.EntertainerID = EN.EntertainerID
+        inner join
+            Entertainer_Styles ES
+            on ES.EntertainerID = EN.EntertainerID
+        inner join
+            Musical_Styles MS
+            on MS.StyleID = ES.StyleID
+        where
+            MS.StyleName in ('Country', 'Country Rock')
+    );
+/*
+Using exist
+*/
+select
+    A.AgentID,
+    A.AgtFirstName,
+    A.AgtLastName
+from
+    Agents A
+where
+    not exists
+    (
+        select
+            *
+        from
+            Engagements E
+        inner join
+            Entertainers EN
+            on E.EntertainerID = EN.EntertainerID
+        inner join
+            Entertainer_Styles ES
+            on ES.EntertainerID = EN.EntertainerID
+        inner join
+            Musical_Styles MS
+            on MS.StyleID = ES.StyleID
+        where
+            MS.StyleName in ('Country', 'Country Rock')
+            and
+            E.AgentID = A.AgentID
+    );
 -----------------------------------------------------------------
-
+use SchoolSchedulingExample;
 -----------------------------------------------------------------
+/*
+“List students who have a grade of 85 or better in both art and
+computer science.”
+*/
+/*
+using join
+*/
+select
+    A.StudentID,
+    A.StudFirstName,
+    A.StudLastName
+from
+    (
+        select
+            S1.StudentID,
+            S1.StudFirstName,
+            S1.StudLastName
+        from
+            Students S1
+        inner join
+            Student_Schedules SS1
+            on SS1.StudentID = S1.StudentID
+        inner join
+            Classes C1
+            on C1.ClassID = SS1.ClassID
+        inner join
+            Subjects SU1
+            on SU1.SubjectID = C1.SubjectID
+        inner join
+            Categories CA1
+            on CA1.CategoryID = SU1.CategoryID
+        where
+            CA1.CategoryDescription = 'Art'
+    ) A
+    inner join
+    (
+        select
+            S2.StudentID,
+            S2.StudFirstName,
+            S2.StudLastName
+        from
+            Students S2
+        inner join
+            Student_Schedules SS2
+            on SS2.StudentID = S2.StudentID
+        inner join
+            Classes C2
+            on C2.ClassID = SS2.ClassID
+        inner join
+            Subjects SU2
+            on SU2.SubjectID = C2.SubjectID
+        inner join
+            Categories CA2
+            on CA2.CategoryID = SU2.CategoryID
+        where
+            CA2.CategoryDescription = 'Computer Science'
+    ) C
+    on C.StudentID = A.StudentID;
+
 
 -----------------------------------------------------------------
 
