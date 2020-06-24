@@ -841,6 +841,8 @@ from
             on CA1.CategoryID = SU1.CategoryID
         where
             CA1.CategoryDescription = 'Art'
+            and
+            SS1.Grade >= 85
     ) A
     inner join
     (
@@ -863,23 +865,286 @@ from
             Categories CA2
             on CA2.CategoryID = SU2.CategoryID
         where
-            CA2.CategoryDescription = 'Computer Science'
+            CA2.CategoryDescription like '%Computer%'
+            and
+            SS2.Grade >= 85
     ) C
     on C.StudentID = A.StudentID;
-
-
+/*
+using in
+*/
+select
+    S.StudentID,
+    S.StudFirstName,
+    S.StudLastName
+from
+    Students S
+where
+    S.StudentID in (
+        select
+            SS1.StudentID
+        from
+            Student_Schedules SS1
+        inner join
+            Classes C1
+            on C1.ClassID = SS1.ClassID
+        inner join
+            Subjects S1
+            on S1.SubjectID = C1.SubjectID
+        inner join
+            Categories CA1
+            on CA1.CategoryID = S1.CategoryID
+        where
+            CA1.CategoryDescription = 'Art'
+            and
+            SS1.Grade >= 85
+    )
+    and
+    S.StudentID in (
+    select
+        SS2.StudentID
+    from
+        Student_Schedules SS2
+    inner join
+        Classes C2
+        on C2.ClassID = SS2.ClassID
+    inner join
+        Subjects S2
+        on S2.SubjectID = C2.SubjectID
+    inner join
+        Categories CA2
+        on CA2.CategoryID = S2.CategoryID
+    where
+        CA2.CategoryDescription like '%Computer%'
+        and
+        SS2.Grade >= 85
+    );
+/*
+using exists
+*/
+select
+    S.StudentID,
+    S.StudFirstName,
+    S.StudLastName
+from
+    Students S
+where
+    exists (
+        select
+            *
+        from
+            Student_Schedules SS1
+        inner join
+            Classes C1
+            on C1.ClassID = SS1.ClassID
+        inner join
+            Subjects S1
+            on S1.SubjectID = C1.SubjectID
+        inner join
+            Categories CA1
+            on CA1.CategoryID = S1.CategoryID
+        where
+            CA1.CategoryDescription = 'Art'
+            and
+            SS1.Grade >= 85
+            and
+            S.StudentID = SS1.StudentID
+    )
+    and
+    exists (
+    select
+        *
+    from
+        Student_Schedules SS2
+    inner join
+        Classes C2
+        on C2.ClassID = SS2.ClassID
+    inner join
+        Subjects S2
+        on S2.SubjectID = C2.SubjectID
+    inner join
+        Categories CA2
+        on CA2.CategoryID = S2.CategoryID
+    where
+        CA2.CategoryDescription like '%Computer%'
+        and
+        SS2.Grade >= 85
+        and
+        SS2.StudentID = S.StudentID
+    );
 -----------------------------------------------------------------
-
+/*
+“Show me students registered for classes for which they have not
+completed the prerequisite course.”
+*/
+???
 -----------------------------------------------------------------
-
+use BowlingLeagueExample;
 -----------------------------------------------------------------
-
+/*
+“List the bowlers, the match number, the game number, the
+handicap score, the tournament date, and the tournament location
+for bowlers who won a game with a handicap score of 190 or less
+at Thunderbird Lanes, Totem Lanes, and Bolero Lanes.”
+*/
+select
+    B.BowlerID,
+    B.BowlerFirstName,
+    B.BowlerLastName,
+    BS.MatchID,
+    BS.GameNumber,
+    BS.HandiCapScore,
+    T.TourneyDate,
+    T.TourneyLocation
+from
+    Bowlers B
+inner join
+    Bowler_Scores BS
+    on B.BowlerID = BS.BowlerID
+inner join
+    Tourney_Matches TM
+    on TM.MatchID = BS.MatchID
+inner join
+    Tournaments T
+    on T.TourneyID = TM.TourneyID
+where
+    BS.HandiCapScore <= 190
+    and
+    BS.WonGame = 1
+    and
+    T.TourneyLocation in ('Thunderbird Lanes', 'Totem Lanes',
+    'Bolero Lanes')
+    and
+    B.BowlerID in (
+        select
+            BS1.BowlerID
+        from
+            Bowler_Scores BS1
+        inner join
+            Tourney_Matches TM1
+            on TM1.MatchID = BS1.MatchID
+        inner join
+            Tournaments T1
+            on T1.TourneyID = TM1.TourneyID
+        where
+            T1.TourneyLocation = 'Thunderbird Lanes'
+            and
+            BS1.WonGame = 1
+            and
+            BS1.HandiCapScore <= 190
+    )
+    and
+    B.BowlerID in (
+        select
+            BS2.BowlerID
+        from
+            Bowler_Scores BS2
+        inner join
+            Tourney_Matches TM2
+            on TM2.MatchID = BS2.MatchID
+        inner join
+            Tournaments T2
+            on T2.TourneyID = TM2.TourneyID
+        where
+            T2.TourneyLocation = 'Totem Lanes'
+            and
+            BS2.WonGame = 1
+            and
+            BS2.HandiCapScore <= 190
+    )
+    and
+    B.BowlerID in (
+        select
+            BS3.BowlerID
+        from
+            Bowler_Scores BS3
+        inner join
+            Tourney_Matches TM3
+            on TM3.MatchID = BS3.MatchID
+        inner join
+            Tournaments T3
+            on T3.TourneyID = TM3.TourneyID
+        where
+            T3.TourneyLocation = 'Bolero Lanes'
+            and
+            BS3.WonGame = 1
+            and
+            BS3.HandiCapScore <= 190
+    );
 -----------------------------------------------------------------
-
+/*
+“Show me the bowlers who have not bowled a raw score better than
+165 at Thunderbird Lanes and Bolero Lanes.”
+*/
+select
+    B.BowlerID,
+    B.BowlerFirstName,
+    B.BowlerLastName
+from
+    Bowlers B
+where
+    B.BowlerID not in (
+        select
+            BS1.BowlerID
+        from
+            Bowler_Scores BS1
+        inner join
+            Tourney_Matches TM1
+            on TM1.MatchID = BS1.MatchID
+        inner join
+            Tournaments T1
+            on T1.TourneyID = TM1.TourneyID
+        where
+            BS1.RawScore > 165
+            and
+            T1.TourneyLocation = 'Thunderbird Lanes'
+    )
+    and
+    B.BowlerID not in (
+        select
+            BS2.BowlerID
+        from
+            Bowler_Scores BS2
+        inner join
+            Tourney_Matches TM2
+            on TM2.MatchID = BS2.MatchID
+        inner join
+            Tournaments T2
+            on T2.TourneyID = TM2.TourneyID
+        where
+            BS2.RawScore > 165
+            and
+            T2.TourneyLocation = 'Bolero Lanes'
+    );
 -----------------------------------------------------------------
-
+use RecipesExample;
 -----------------------------------------------------------------
-
+/*
+“Display the ingredients that are not used in the recipes for
+Irish Stew, Pollo Picoso, and Roast Beef.”
+*/
+select
+    I.IngredientID,
+    I.IngredientName
+from
+    Ingredients I
+where
+    I.IngredientID not in
+    (
+        select
+            RI.IngredientID
+        from
+            Recipe_Ingredients RI
+        inner join
+            Recipes R
+            on R.RecipeID = RI.RecipeID
+        where
+            R.RecipeTitle in ('Irish Stew', 'Pollo Picoso', 'Roast Beef')
+    );
 -----------------------------------------------------------------
+/*
+“List the pairs of recipes where both recipes have at least the
+same three ingredients.”
+*/
 
 -----------------------------------------------------------------
