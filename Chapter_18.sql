@@ -1139,12 +1139,225 @@ where
             Recipes R
             on R.RecipeID = RI.RecipeID
         where
-            R.RecipeTitle in ('Irish Stew', 'Pollo Picoso', 'Roast Beef')
+            R.RecipeTitle in ('Irish Stew', 'Pollo Picoso',
+            'Roast Beef')
     );
 -----------------------------------------------------------------
 /*
 “List the pairs of recipes where both recipes have at least the
 same three ingredients.”
 */
-
+select distinct
+    R1.RecipeID as "Recipe1-ID",
+    R1.RecipeTitle as "Recipe1",
+    R2.RecipeID as "Recipe2-ID",
+    R2.RecipeTitle as "Recipe2"
+from
+    Recipes R1
+inner join
+    Recipe_Ingredients RI1
+    on R1.RecipeID = RI1.RecipeID
+inner join
+    Recipe_Ingredients RI2
+    on RI1.IngredientID = RI2.IngredientID
+inner join
+    Recipes R2
+    on R2.RecipeID = RI2.RecipeID
+where
+    RI2.RecipeID > R1.RecipeID
+group by
+    R1.RecipeID,
+    R1.RecipeTitle,
+    R2.RecipeID,
+    R2.RecipeTitle
+having
+    count(RI1.RecipeID) >= 3;
+-----------------------------------------------------------------
+                    P R A T I C E - Q U E S T I O N
+-----------------------------------------------------------------
+use SalesOrdersExample;
+-----------------------------------------------------------------
+ /*
+ “Display the customers who have never ordered bikes or tires.”
+ */
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+left join
+    (
+        select
+            O.CustomerID
+        from
+            Orders O
+        inner join
+            Order_Details OD
+            on O.OrderNumber = OD.OrderNumber
+        inner join
+            Products P
+            on P.ProductNumber = OD.ProductNumber
+        inner join
+            Categories CC
+            on CC.CategoryID = P.CategoryID
+        where
+            CC.CategoryDescription in ('Bikes', 'Tires')
+    ) BT
+    on BT.CustomerID = C.CustomerID
+where
+    BT.CustomerID is null;
+-----------------------------------------------------------------
+/*
+“List the customers who have purchased a bike but not a helmet.”
+*/
+/*
+using exists
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+where
+    exists (
+        select
+            *
+        from
+            Orders O
+        inner join
+            Order_Details OD
+            on O.OrderNumber = OD.OrderNumber
+        inner join
+            Products P
+            on P.ProductNumber = OD.ProductNumber
+        inner join
+            Categories CC
+            on CC.CategoryID = P.CategoryID
+        where
+            CC.CategoryDescription = "Bikes"
+        and
+            O.CustomerID = C.CustomerID
+    )
+    and
+    not exists (
+        select
+            *
+        from
+            Orders O
+        inner join
+            Order_Details OD
+            on O.OrderNumber = OD.OrderNumber
+        inner join
+            Products P
+            on P.ProductNumber = OD.ProductNumber
+        where
+            P.ProductName like "%Helmet"
+            and
+            C.CustomerID = O.CustomerID
+    );
+/*
+using in
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+where
+    C.CustomerID in (
+        select
+            O.CustomerID
+        from
+            Orders O
+        inner join
+            Order_Details OD
+            on O.OrderNumber = OD.OrderNumber
+        inner join
+            Products P
+            on P.ProductNumber = OD.ProductNumber
+        inner join
+            Categories CC
+            on CC.CategoryID = P.CategoryID
+        where
+            CC.CategoryDescription = "Bikes"
+    )
+    and
+    C.CustomerID not in(
+        select
+            O.CustomerID
+        from
+            Orders O
+        inner join
+            Order_Details OD
+            on O.OrderNumber = OD.OrderNumber
+        inner join
+            Products P
+            on P.ProductNumber = OD.ProductNumber
+        where
+            P.ProductName like "%Helmet"
+    );
+-----------------------------------------------------------------
+/*
+“Show me the customer orders that have a bike but do not have a
+helmet.”
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName,
+    O.OrderNumber,
+    O.OrderDate
+from
+    Orders O
+inner join
+    Customers C
+    on C.CustomerID = O.CustomerID
+where
+    exists (
+        select
+            *
+        from
+            Order_Details OD1
+        inner join
+            Products P1
+            on P1.ProductNumber = OD1.ProductNumber
+        inner join
+            Categories C1
+            on C1.CategoryID = P1.CategoryID
+        where
+            OD1.OrderNumber = O.OrderNumber
+            and
+            C1.CategoryDescription = 'Bikes'
+    )
+    and
+    not exists (
+        select
+            *
+        from
+            Order_Details OD2
+        inner join
+            Products P2
+            on P2.ProductNumber = OD2.ProductNumber
+        where
+            OD2.OrderNumber = O.OrderNumber
+            and
+            P2.ProductName like "%Helmet"
+    );
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+-----------------------------------------------------------------
 -----------------------------------------------------------------
