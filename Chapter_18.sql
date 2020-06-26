@@ -1347,10 +1347,115 @@ where
             P2.ProductName like "%Helmet"
     );
 -----------------------------------------------------------------
+/*
+“Display the customers and their orders that have a bike and a
+helmet in the same order.”
+*/
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName,
+    O.OrderNumber
+from
+    Customers C
+inner join
+    Orders O
+    On O.CustomerID = C.CustomerID
+where
+    exists (
+        select
+            *
+        from
+            Order_Details OD1
+        inner join
+            Products P1
+            on P1.ProductNumber = OD1.ProductNumber
+        inner join
+            Categories C1
+            on C1.CategoryID = P1.CategoryID
+        where
+            OD1.OrderNumber = O.OrderNumber
+            and
+            C1.CategoryDescription = 'Bikes'
+    )
+    and
+    exists (
+        select
+            *
+        from
+            Order_Details OD2
+        inner join
+            Products P2
+            on P2.ProductNumber = OD2.ProductNumber
+        where
+            OD2.OrderNumber = O.OrderNumber
+            and
+            P2.ProductName like "%Helmet"
+    );
 -----------------------------------------------------------------
+/*
+“Show the vendors who sell accessories, car racks, and clothing.”
+*/
+select
+    V.VendorID,
+    V.VendName
+from
+    Vendors V
+where
+    V.VendorID in
+    (
+        select
+            PV1.VendorID
+        from
+            Product_Vendors PV1
+        inner join
+            Products P1
+            on P1.ProductNumber = PV1.ProductNumber
+        inner join
+            Categories C1
+            on C1.CategoryID = P1.CategoryID
+        where
+            C1.CategoryDescription = 'Clothing'
+    )
+    and
+    V.VendorID in
+    (
+        select
+            PV2.VendorID
+        from
+            Product_Vendors PV2
+        inner join
+            Products P2
+            on P2.ProductNumber = PV2.ProductNumber
+        inner join
+            Categories C2
+            on C2.CategoryID = P2.CategoryID
+        where
+            C2.CategoryDescription = 'Car racks'
+    )
+    and
+    V.VendorID in
+    (
+        select
+            PV3.VendorID
+        from
+            Product_Vendors PV3
+        inner join
+            Products P3
+            on P3.ProductNumber = PV3.ProductNumber
+        inner join
+            Categories C3
+            on C3.CategoryID = P3.CategoryID
+        where
+            C3.CategoryDescription = 'Accessories'
+    );
 -----------------------------------------------------------------
+use EntertainmentAgencyExample;
 -----------------------------------------------------------------
------------------------------------------------------------------
+/*
+ “List the entertainers who play the Jazz, Rhythm and Blues, and
+ Salsa styles.”
+ */
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 -----------------------------------------------------------------
