@@ -104,7 +104,7 @@ select
     S.StfFirstName,
     S.StfLastname,
     year(cast('2017-10-01' as date)) - year(S.DateHired) -
-        - case
+        case
             when month(S.DateHired) < 10
                 then 0
             when month(S.DateHired) > 10
@@ -120,12 +120,77 @@ order by
     S.StaffID,
     S.StfFirstName,
     S.StfLastname;
-
 -----------------------------------------------------------------
+/*
+“Create a student mailing list that includes a generated
+salutation, first name and last name, the street address, and a
+city, state, and ZIP code field.”
+*/
+select
+    concat(
+    case
+        when S.StudGender = 'M'
+            then 'Mr. '
+        when S.StudMaritalStatus = 'S'
+            then 'Ms. '
+        else
+            'Mrs. '
+    end, S.StudFirstName, S.StudLastName) as Name,
+    S.StudStreetAddress,
+    S.StudCity,
+    S.StudState,
+    S.StudZipCode
+from
+    Students S;
 -----------------------------------------------------------------
+/*
+“List all students who are ‘Male’.”
+*/
+select
+    S.StudentID,
+    S.StudFirstName,
+    S.StudLastName,
+    "Male" as Gender
+from
+    Students S
+where
+    "Male" = case S.StudGender
+                when 'M'
+                    then "Male"
+                else
+                    "Nomatch"
+                end;
 -----------------------------------------------------------------
+                    P R A T I C E - Q U E S T I O N
 -----------------------------------------------------------------
+use SalesOrdersExample;
 -----------------------------------------------------------------
+/*
+“List all products and display whether the product was sold in
+December 2017.”
+*/
+select
+    P.ProductNumber,
+    P.ProductName,
+    case
+        when P.ProductNumber in (
+            select
+                OD.ProductNumber
+            from
+                Order_Details OD
+            inner join
+                Orders O
+                on O.OrderNumber = OD.OrderNumber
+            where
+                O.OrderDate between cast('2017-12-01' as date)
+                and cast('2017-12-31' as date)
+        )
+            then "Ordered"
+        else
+            "Not Ordered"
+    end as "Sells"
+from
+    Products P;
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 -----------------------------------------------------------------
