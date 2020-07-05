@@ -109,28 +109,28 @@ CREATE VIEW CH08_Good_Art_CS_Students
 AS
 SELECT     StudArt.StudFullName
 FROM         (SELECT DISTINCT Students.StudentID,  Concat(Students.StudLastName, ', ', Students.StudFirstName) AS StudFullName
-              FROM          (((Students 
-                INNER JOIN Student_Schedules 
-                ON Students.StudentID = Student_Schedules.StudentID) 
-                INNER JOIN Classes 
-                ON Classes.ClassID = Student_Schedules.ClassID) 
-                INNER JOIN Subjects 
-                ON Subjects.SubjectID = Classes.SubjectID) 
-                INNER JOIN Categories 
+              FROM          (((Students
+                INNER JOIN Student_Schedules
+                ON Students.StudentID = Student_Schedules.StudentID)
+                INNER JOIN Classes
+                ON Classes.ClassID = Student_Schedules.ClassID)
+                INNER JOIN Subjects
+                ON Subjects.SubjectID = Classes.SubjectID)
+                INNER JOIN Categories
                 ON Categories.CategoryID = Subjects.CategoryID
-              WHERE      Categories.CategoryDescription = 'Art' 
-                         AND Student_Schedules.Grade >= 85) StudArt 
+              WHERE      Categories.CategoryDescription = 'Art'
+                         AND Student_Schedules.Grade >= 85) StudArt
     INNER JOIN
              (SELECT DISTINCT Student_Schedules.StudentID
-              FROM          ((Student_Schedules 
-                INNER JOIN Classes 
-                ON Classes.ClassID = Student_Schedules.ClassID) 
-                INNER JOIN Subjects 
-                ON Subjects.SubjectID = Classes.SubjectID) 
-                INNER JOIN Categories 
+              FROM          ((Student_Schedules
+                INNER JOIN Classes
+                ON Classes.ClassID = Student_Schedules.ClassID)
+                INNER JOIN Subjects
+                ON Subjects.SubjectID = Classes.SubjectID)
+                INNER JOIN Categories
                 ON Categories.CategoryID = Subjects.CategoryID
-              WHERE      Categories.CategoryDescription LIKE '%Computer%' 
-                         AND Student_Schedules.Grade >= 85) StudCS 
+              WHERE      Categories.CategoryDescription LIKE '%Computer%'
+                         AND Student_Schedules.Grade >= 85) StudCS
     ON StudArt.StudentID = StudCS.StudentID;
 
 
@@ -159,39 +159,39 @@ WHERE Classes.WednesdaySchedule = 1 ;
 CREATE VIEW CH09_All_Categories_All_Subjects_Any_Classes
 AS
 SELECT Categories.CategoryDescription, Subjects.SubjectName, Classes.ClassRoomID, Classes.StartDate, Classes.StartTime, Classes.Duration
-FROM (Categories LEFT JOIN Subjects 
-ON Categories.CategoryID = Subjects.CategoryID) 
+FROM (Categories LEFT JOIN Subjects
+ON Categories.CategoryID = Subjects.CategoryID)
 LEFT JOIN Classes ON Subjects.SubjectID = Classes.SubjectID;
 
 
 CREATE VIEW CH09_All_Faculty_And_Any_Classes
 AS
-SELECT   Concat(Staff.StfLastname, ', ', Staff.StfFirstName) AS StaffName, Sched.SubjectName, Sched.ClassID, Sched.ClassRoomID, Sched.StartTime, 
+SELECT   Concat(Staff.StfLastname, ', ', Staff.StfFirstName) AS StaffName, Sched.SubjectName, Sched.ClassID, Sched.ClassRoomID, Sched.StartTime,
                       Sched.Duration
 FROM         Staff LEFT OUTER JOIN
                    (SELECT     Faculty_Classes.StaffID, Subjects.SubjectName, Classes.ClassID, Classes.ClassRoomID, Classes.StartTime, Classes.Duration
-                   FROM          Subjects 
-                       INNER JOIN (Classes 
-                           INNER JOIN Faculty_Classes 
-                           ON Classes.ClassID = Faculty_Classes.ClassID) 
-                       ON Subjects.SubjectID = Classes.SubjectID) Sched 
+                   FROM          Subjects
+                       INNER JOIN (Classes
+                           INNER JOIN Faculty_Classes
+                           ON Classes.ClassID = Faculty_Classes.ClassID)
+                       ON Subjects.SubjectID = Classes.SubjectID) Sched
              ON  Staff.StaffID = Sched.StaffID;
 
 
 CREATE VIEW CH09_Classes_No_Students_Enrolled
 AS
 SELECT     Subjects.SubjectName, Classes.ClassRoomID, Classes.StartTime, Classes.Duration
-FROM         Subjects 
-             INNER JOIN Classes 
+FROM         Subjects
+             INNER JOIN Classes
               ON Subjects.SubjectID = Classes.SubjectID
                  LEFT OUTER JOIN
                   (SELECT     Student_Schedules.ClassID
-                   FROM       Student_Class_Status 
-                              INNER JOIN Student_Schedules 
-                              ON Student_Class_Status.ClassStatus = 
+                   FROM       Student_Class_Status
+                              INNER JOIN Student_Schedules
+                              ON Student_Class_Status.ClassStatus =
                                   Student_Schedules.ClassStatus
-                   WHERE      Student_Class_Status.ClassStatusDescription = 'enrolled') Enrolled 
-                 ON Classes.ClassID = Enrolled.ClassID 
+                   WHERE      Student_Class_Status.ClassStatusDescription = 'enrolled') Enrolled
+                 ON Classes.ClassID = Enrolled.ClassID
 WHERE     (Enrolled.ClassID IS NULL);
 
 
@@ -207,12 +207,12 @@ AS
 SELECT   Concat(Students.StudLastName, ', ', Students.StudFirstName) AS StudFullName
 FROM         Students LEFT OUTER JOIN
                (SELECT     Student_Schedules.StudentID
-                FROM          Student_Class_Status 
-                              INNER JOIN Student_Schedules 
-                              ON Student_Class_Status.ClassStatus = 
+                FROM          Student_Class_Status
+                              INNER JOIN Student_Schedules
+                              ON Student_Class_Status.ClassStatus =
                                   Student_Schedules.ClassStatus
-                WHERE      Student_Class_Status.ClassStatusDescription 
-                             = 'withdrew') Withdrew 
+                WHERE      Student_Class_Status.ClassStatusDescription
+                             = 'withdrew') Withdrew
              ON Students.StudentID = Withdrew.StudentID
 WHERE     (Withdrew.StudentID IS NULL);
 
@@ -223,7 +223,7 @@ SELECT     Students.StudentID, Students.StudFirstName, Students.StudLastName
 FROM         Students LEFT OUTER JOIN
                           (SELECT     StudentID, ClassID, ClassStatus
                             FROM          Student_Schedules
-                            WHERE      ClassStatus = 1) Sched 
+                            WHERE      ClassStatus = 1) Sched
                       ON Students.StudentID = Sched.StudentID
 WHERE     (Sched.StudentID IS NULL);
 
@@ -252,13 +252,13 @@ WHERE     Faculty_Subjects.ProficiencyRating > 8 AND Subjects.CategoryID = 'ART'
 
 CREATE VIEW CH10_Student_Staff_Mailing_List
 AS
-SELECT  Concat(Students.StudFirstName, ' ', Students.StudLastName) AS Name, 
-       Students.StudStreetAddress, Students.StudCity, 
+SELECT  Concat(Students.StudFirstName, ' ', Students.StudLastName) AS Name,
+       Students.StudStreetAddress, Students.StudCity,
        Students.StudState, Students.StudZipCode
     FROM          Students
 UNION
-SELECT  Concat(Staff.StfFirstName, ' ', Staff.StfLastname) AS Name, 
-         Staff.StfStreetAddress, Staff.StfCity, Staff.StfState, 
+SELECT  Concat(Staff.StfFirstName, ' ', Staff.StfLastname) AS Name,
+         Staff.StfStreetAddress, Staff.StfCity, Staff.StfState,
          Staff.StfZipCode
     FROM         Staff
 ORDER BY 5;
@@ -348,16 +348,16 @@ FROM Staff ;
 CREATE VIEW CH13_Student_GradeAverage_By_Category
 AS
 SELECT Categories.CategoryDescription, Students.StudFirstName, Students.StudLastName, avg(Student_Schedules.Grade) AS AvgOfGrade
-FROM ((((Categories 
-         INNER JOIN Subjects 
-           ON (Categories.CategoryID = Subjects.CategoryID)) 
-         INNER JOIN Classes 
-           ON (Subjects.SubjectID = Classes.SubjectID)) 
-         INNER JOIN Student_Schedules 
-           ON (Classes.ClassID = Student_Schedules.ClassID)) 
-         INNER JOIN Student_Class_Status 
-           ON (Student_Class_Status.ClassStatus = Student_Schedules.ClassStatus)) 
-         INNER JOIN Students 
+FROM ((((Categories
+         INNER JOIN Subjects
+           ON (Categories.CategoryID = Subjects.CategoryID))
+         INNER JOIN Classes
+           ON (Subjects.SubjectID = Classes.SubjectID))
+         INNER JOIN Student_Schedules
+           ON (Classes.ClassID = Student_Schedules.ClassID))
+         INNER JOIN Student_Class_Status
+           ON (Student_Class_Status.ClassStatus = Student_Schedules.ClassStatus))
+         INNER JOIN Students
            ON (Students.StudentID =     Student_Schedules.StudentID)
 WHERE Student_Class_Status.ClassStatusDescription =     'Completed'
 GROUP BY Categories.CategoryDescription, Students.StudFirstName, Students.StudLastName ;
@@ -365,16 +365,16 @@ GROUP BY Categories.CategoryDescription, Students.StudFirstName, Students.StudLa
 CREATE VIEW CH14_A_Students
 AS
 SELECT Categories.CategoryDescription, Students.StudFirstName, Students.StudLastName, avg(Student_Schedules.Grade) AS AvgOfGrade
-FROM ((((Categories 
-         INNER JOIN Subjects 
-           ON (Categories.CategoryID = Subjects.CategoryID)) 
-         INNER JOIN Classes 
-           ON (Subjects.SubjectID = Classes.SubjectID)) 
-         INNER JOIN Student_Schedules 
-           ON (Classes.ClassID = Student_Schedules.ClassID)) 
-         INNER JOIN Student_Class_Status 
-           ON (Student_Class_Status.ClassStatus = Student_Schedules.ClassStatus)) 
-         INNER JOIN Students 
+FROM ((((Categories
+         INNER JOIN Subjects
+           ON (Categories.CategoryID = Subjects.CategoryID))
+         INNER JOIN Classes
+           ON (Subjects.SubjectID = Classes.SubjectID))
+         INNER JOIN Student_Schedules
+           ON (Classes.ClassID = Student_Schedules.ClassID))
+         INNER JOIN Student_Class_Status
+           ON (Student_Class_Status.ClassStatus = Student_Schedules.ClassStatus))
+         INNER JOIN Students
            ON (Students.StudentID =     Student_Schedules.StudentID)
 WHERE Student_Class_Status.ClassStatusDescription =     'Completed'
 GROUP BY Categories.CategoryDescription, Students.StudFirstName, Students.StudLastName
@@ -391,7 +391,7 @@ CREATE VIEW CH14_Count_Of_Biology_Professors
 AS
 SELECT count(Faculty.StaffID) AS BiologyProfessors
 FROM (Faculty INNER JOIN Faculty_Categories ON (Faculty.StaffID =     Faculty_Categories.StaffID)) INNER JOIN Categories ON (Categories.CategoryID =     Faculty_Categories.CategoryID)
-WHERE Categories.CategoryDescription = 'Biology' 
+WHERE Categories.CategoryDescription = 'Biology'
       AND Faculty.Title = 'Professor' ;
 
 CREATE VIEW CH14_Staff_Class_Count_1_To_3
@@ -408,7 +408,7 @@ FROM Staff LEFT JOIN Faculty_Classes ON Staff.StaffID=Faculty_Classes.StaffID
 GROUP BY Staff.StfFirstName, Staff.StfLastname;
 
 CREATE VIEW CH14_Staff_Class_Count_GROUPED_WRONG
-AS 
+AS
 SELECT Staff.StfFirstName, Staff.StfLastname, Count(*) AS ClassCount
 FROM Staff
 INNER JOIN Faculty_Classes
@@ -417,7 +417,7 @@ GROUP BY Staff.StfFirstName, Staff.StfLastname;
 
 CREATE VIEW CH14_Staff_Class_Count_Subquery
 AS
-SELECT Staff.StfFirstName, Staff.StfLastname, 
+SELECT Staff.StfFirstName, Staff.StfLastname,
    (SELECT COUNT(*) FROM Faculty_Classes WHERE Faculty_Classes.StaffID = Staff.StaffID) AS ClassCount
 FROM Staff
 ORDER BY stfFirstName, stfLastName;
@@ -439,13 +439,13 @@ WHERE ((SELECT COUNT(S3.StaffID)
 CREATE VIEW CH14_Subjects_Fewer_3_Professors_Join_RIGHT
 AS
 SELECT Categories.CategoryDescription, Count(FCP.StaffID) AS ProfCount
-FROM Categories LEFT JOIN 
+FROM Categories LEFT JOIN
 (SELECT Faculty_Categories.CategoryID, Faculty_Categories.StaffID
-FROM Faculty_Categories 
+FROM Faculty_Categories
 INNER JOIN Faculty
 ON Faculty_Categories.StaffID = Faculty.StaffID
 WHERE Faculty.Title='Professor') AS FCP
-ON Categories.CategoryID = FCP.CategoryID 
+ON Categories.CategoryID = FCP.CategoryID
 GROUP BY Categories.CategoryDescription
 HAVING Count(FCP.StaffID) < 3;
 
@@ -455,28 +455,28 @@ AS
 SELECT CategoryDescription,
        (SELECT     COUNT(Faculty.StaffID)
            FROM (Faculty INNER JOIN
-                 Faculty_Categories 
+                 Faculty_Categories
                    ON Faculty.StaffID = Faculty_Categories.StaffID) INNER JOIN
-                 Categories AS C2 
+                 Categories AS C2
                    ON C2.CategoryID = Faculty_Categories.CategoryID
-           WHERE C2.CategoryID = Categories.CategoryID 
+           WHERE C2.CategoryID = Categories.CategoryID
                AND Faculty.Title = 'Professor') AS ProfCount
 FROM         Categories
 WHERE ((SELECT COUNT(Faculty.StaffID)
            FROM (Faculty INNER JOIN
-                 Faculty_Categories 
+                 Faculty_Categories
                    ON Faculty.StaffID = Faculty_Categories.StaffID) INNER JOIN
-                 Categories AS C3 
+                 Categories AS C3
                    ON C3.CategoryID = Faculty_Categories.CategoryID
-           WHERE C3.CategoryID = Categories.CategoryID 
+           WHERE C3.CategoryID = Categories.CategoryID
               AND Faculty.Title = 'Professor') < 3);
 
 CREATE VIEW CH14_Subjects_Fewer_3_Professors_WRONG
 AS
 SELECT Categories.CategoryDescription, Count(Faculty_Categories.StaffID) AS ProfCount
-FROM (Categories INNER JOIN Faculty_Categories 
-        ON (Categories.CategoryID = Faculty_Categories.CategoryID)) 
-      INNER JOIN Faculty 
+FROM (Categories INNER JOIN Faculty_Categories
+        ON (Categories.CategoryID = Faculty_Categories.CategoryID))
+      INNER JOIN Faculty
         ON (Faculty.StaffID = Faculty_Categories.StaffID)
 WHERE Faculty.Title='Professor'
 GROUP BY Categories.CategoryDescription
@@ -484,7 +484,7 @@ HAVING count(Faculty_Categories.StaffID) < 3 ;
 
 
 CREATE VIEW CH18_Classes_No_Students_Enrolled_NOT_IN
-AS 
+AS
 SELECT Subjects.SubjectName, Classes.ClassRoomID, Classes.StartTime, Classes.Duration
 FROM Subjects
 INNER JOIN Classes
@@ -495,10 +495,10 @@ ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus WHERE Studen
 
 
 CREATE VIEW CH18_Good_Art_CS_Students_EXISTS
-AS 
+AS
 SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName
 FROM Students
-WHERE EXISTS 
+WHERE EXISTS
 (SELECT Student_Schedules.StudentID
 FROM ((Student_Schedules
 INNER JOIN Classes
@@ -510,7 +510,7 @@ ON Categories.CategoryID = Subjects.CategoryID
 WHERE Categories.CategoryDescription = 'Art'
 AND Student_Schedules.Grade >= 85
 AND Student_Schedules.StudentID = Students.StudentID)
-AND EXISTS 
+AND EXISTS
 (SELECT Student_Schedules.StudentID
 FROM ((Student_Schedules
 INNER JOIN Classes
@@ -525,44 +525,44 @@ AND Student_Schedules.StudentID = Students.StudentID);
 
 
 CREATE VIEW CH18_Good_Art_CS_Students_IN
-AS 
+AS
 SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName
 FROM Students
 WHERE Students.StudentID IN
-(SELECT Student_Schedules.StudentID 
+(SELECT Student_Schedules.StudentID
 FROM ((Student_Schedules
-INNER JOIN Classes 
-ON Classes.ClassID = Student_Schedules.ClassID) 
-INNER JOIN Subjects 
-ON Subjects.SubjectID = Classes.SubjectID) 
-INNER JOIN Categories 
-ON Categories.CategoryID = Subjects.CategoryID 
-WHERE Categories.CategoryDescription = 'Art' 
-AND Student_Schedules.Grade >= 85) 
-AND Students.StudentID IN 
-(SELECT Student_Schedules.StudentID 
+INNER JOIN Classes
+ON Classes.ClassID = Student_Schedules.ClassID)
+INNER JOIN Subjects
+ON Subjects.SubjectID = Classes.SubjectID)
+INNER JOIN Categories
+ON Categories.CategoryID = Subjects.CategoryID
+WHERE Categories.CategoryDescription = 'Art'
+AND Student_Schedules.Grade >= 85)
+AND Students.StudentID IN
+(SELECT Student_Schedules.StudentID
 FROM ((Student_Schedules
-INNER JOIN Classes 
-ON Classes.ClassID = Student_Schedules.ClassID) 
-INNER JOIN Subjects 
-ON Subjects.SubjectID = Classes.SubjectID) 
-INNER JOIN Categories 
-ON Categories.CategoryID = Subjects.CategoryID 
-WHERE Categories.CategoryDescription LIKE '%Computer%' 
+INNER JOIN Classes
+ON Classes.ClassID = Student_Schedules.ClassID)
+INNER JOIN Subjects
+ON Subjects.SubjectID = Classes.SubjectID)
+INNER JOIN Categories
+ON Categories.CategoryID = Subjects.CategoryID
+WHERE Categories.CategoryDescription LIKE '%Computer%'
 AND Student_Schedules.Grade >= 85);
 
 
 CREATE VIEW CH18_Staff_Not_Teaching_EXISTS
-AS 
+AS
 SELECT Staff.StfFirstName, Staff.StfLastname
 FROM Staff
 WHERE NOT EXISTS
-(SELECT * FROM Faculty_Classes 
+(SELECT * FROM Faculty_Classes
 WHERE Faculty_Classes.StaffID = Staff.StaffID);
 
 
 CREATE VIEW CH18_Staff_Teaching_NonAccredited_Classes
-AS 
+AS
 SELECT Staff.StaffID, Staff.StfFirstName, Staff.StfLastname, Classes.ClassID, Classes.ClassRoomID, Classes.StartDate, Classes.SubjectID, Subjects.SubjectCode, Subjects.SubjectName
 FROM ((Classes
 INNER JOIN Faculty_Classes
@@ -575,7 +575,7 @@ WHERE Classes.SubjectID Not In (SELECT SubjectID FROM Faculty_Subjects WHERE Sta
 
 
 CREATE VIEW CH18_Students_Missing_Prerequisites
-AS 
+AS
 SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName, Classes.StartDate, Subjects.SubjectCode, Subjects.SubjectName, Subjects.SubjectPreReq
 FROM ((Students
 INNER JOIN Student_Schedules
@@ -584,37 +584,37 @@ INNER JOIN Classes
 ON Classes.ClassID=Student_Schedules.ClassID)
 INNER JOIN Subjects
 ON Subjects.SubjectID=Classes.SubjectID
-WHERE Subjects.SubjectPreReq Is Not Null  
-AND Subjects.SubjectPreReq NOT IN  
-(SELECT Subjects.SubjectCode  FROM 
+WHERE Subjects.SubjectPreReq Is Not Null
+AND Subjects.SubjectPreReq NOT IN
+(SELECT Subjects.SubjectCode  FROM
 ((Subjects
-INNER JOIN Classes As C2 
-ON Subjects.SubjectID = C2.SubjectID)  
-INNER JOIN Student_Schedules  
-ON C2.ClassID = Student_Schedules.ClassID)  
-INNER JOIN Student_Class_Status  
-ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus  
-WHERE Student_Class_Status.ClassStatusDescription <> 'Withdrew'  
-AND Student_Schedules.StudentID = Students.StudentID  
+INNER JOIN Classes As C2
+ON Subjects.SubjectID = C2.SubjectID)
+INNER JOIN Student_Schedules
+ON C2.ClassID = Student_Schedules.ClassID)
+INNER JOIN Student_Class_Status
+ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus
+WHERE Student_Class_Status.ClassStatusDescription <> 'Withdrew'
+AND Student_Schedules.StudentID = Students.StudentID
 AND C2.StartDate <=  Classes.StartDate);
 
 
 CREATE VIEW CH18_Students_Never_Withdrawn_EXISTS
-AS 
+AS
 SELECT Concat(Students.StudLastName, ', ', Students.StudFirstName) AS StudFullName
 FROM Students
-WHERE NOT EXISTS  (SELECT * FROM Student_Class_Status 
-INNER JOIN Student_Schedules 
+WHERE NOT EXISTS  (SELECT * FROM Student_Class_Status
+INNER JOIN Student_Schedules
 ON Student_Class_Status.ClassStatus = Student_Schedules.ClassStatus  WHERE Student_Class_Status.ClassStatusDescription = 'withdrew'
 AND Student_Schedules.StudentID = Students.StudentID);
 
 
 CREATE VIEW CH18_Students_Not_Currently_Enrolled_NOT_IN
-AS 
+AS
 SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName
 FROM Students
-WHERE Students.StudentID NOT IN 
-(SELECT Student_Schedules.StudentID 
+WHERE Students.StudentID NOT IN
+(SELECT Student_Schedules.StudentID
 FROM Student_Schedules
 INNER JOIN Student_Class_Status
 ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus
@@ -622,7 +622,7 @@ WHERE Student_Class_Status.ClassStatusDescription = 'Enrolled');
 
 
 CREATE VIEW CH18_Students_Passed_All_Grade_GTE_80
-AS 
+AS
 SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName
 FROM Students
 INNER JOIN Student_Schedules
@@ -630,15 +630,15 @@ ON Students.StudentID=Student_Schedules.StudentID
 WHERE (Student_Schedules.Grade>80)
 AND (Student_Schedules.ClassStatus=2)
 GROUP BY Students.StudentID, Students.StudFirstName, Students.StudLastName
-HAVING Count(Students.StudentID) =  
-(SELECT COUNT(*)  
-FROM Student_Schedules  
-WHERE Student_Schedules.ClassStatus = 2  
+HAVING Count(Students.StudentID) =
+(SELECT COUNT(*)
+FROM Student_Schedules
+WHERE Student_Schedules.ClassStatus = 2
 AND Student_Schedules.StudentID = Students.StudentID);
 
 
 CREATE VIEW CH18_Subjects_No_Faculty_NOT_IN
-AS 
+AS
 SELECT Subjects.SubjectID, Subjects.SubjectCode, Subjects.SubjectName
 FROM Subjects
 WHERE Subjects.SubjectID NOT IN
@@ -648,11 +648,11 @@ FROM Faculty_Subjects);
 
 CREATE VIEW CH19_FullTime_Instructor_Raises
 AS
-SELECT        Staff.StaffID, Staff.StfFirstName, Staff.StfLastname, Faculty.Title, Faculty.Status, Staff.Salary, 
-                 (CASE Title 
-                  WHEN 'Instructor' THEN ROUND(Salary * 1.05, 0) 
-                  WHEN 'Associate Professor' THEN ROUND(Salary * 1.04, 0) 
-                  WHEN 'Professor' THEN ROUND(Salary * 1.035, 0) 
+SELECT        Staff.StaffID, Staff.StfFirstName, Staff.StfLastname, Faculty.Title, Faculty.Status, Staff.Salary,
+                 (CASE Title
+                  WHEN 'Instructor' THEN ROUND(Salary * 1.05, 0)
+                  WHEN 'Associate Professor' THEN ROUND(Salary * 1.04, 0)
+                  WHEN 'Professor' THEN ROUND(Salary * 1.035, 0)
                   ELSE Salary END) AS NewSalary
 FROM            Staff INNER JOIN
                          Faculty ON Staff.StaffID = Faculty.StaffID
@@ -661,14 +661,14 @@ WHERE        (Faculty.Status = 'Full Time');
 
 CREATE VIEW CH19_Length_Of_Service
 AS
-SELECT StaffID, StfFirstName, StfLastname, 
-           YEAR(CAST('2017-10-01' As Date)) - YEAR(DateHired) - 
-(CASE WHEN Month(DateHired) < 10 
+SELECT StaffID, StfFirstName, StfLastname,
+           YEAR(CAST('2017-10-01' As Date)) - YEAR(DateHired) -
+(CASE WHEN Month(DateHired) < 10
         THEN 0 
-      WHEN Month(DateHired) > 10 
-        THEN 1 
-      WHEN Day(DateHired) > 1 
-        THEN 1 
+      WHEN Month(DateHired) > 10
+        THEN 1
+      WHEN Day(DateHired) > 1
+        THEN 1
         ELSE 0 END) AS LengthOfService
 FROM    Staff
 ORDER BY StfLastName, StfFirstName;
@@ -683,168 +683,168 @@ WHERE        ('Male' = (CASE StudGender WHEN 'M' THEN 'Male' ELSE 'Nomatch' END)
 
 CREATE VIEW CH19_Student_Age_Nov15_2012
 AS
-SELECT StudentID, StudFirstName, StudLastName, StudBirthDate, 
-          YEAR(CAST('2012-11-15' As Date)) - YEAR(StudBirthDate) - 
-(CASE WHEN Month(StudBirthDate) < 11 
-        THEN 0 
-      WHEN Month(StudBirthDate) > 11 
-         THEN 1 
-      WHEN Day(StudBirthDate) > 15 
-        THEN 1 
+SELECT StudentID, StudFirstName, StudLastName, StudBirthDate,
+          YEAR(CAST('2012-11-15' As Date)) - YEAR(StudBirthDate) -
+(CASE WHEN Month(StudBirthDate) < 11
+        THEN 0
+      WHEN Month(StudBirthDate) > 11
+         THEN 1
+      WHEN Day(StudBirthDate) > 15
+        THEN 1
         ELSE 0 END) AS StudAge
 FROM     Students;
 
 
 CREATE VIEW CH19_Student_Gender
 AS
-SELECT        StudentID, StudFirstName, StudLastName, 
-                    (CASE StudGender 
-                     WHEN 'M' THEN 'Male' 
-                     WHEN 'F' THEN 'Female' 
+SELECT        StudentID, StudFirstName, StudLastName,
+                    (CASE StudGender
+                     WHEN 'M' THEN 'Male'
+                     WHEN 'F' THEN 'Female'
                      ELSE 'Not Specified' END) AS Gender
 FROM            Students;
 
 
 CREATE VIEW CH19_Student_GPA_Avoid_0_Passed
 AS
-SELECT   Students.StudentID, Students.StudFirstName, Students.StudLastName, 
-         COUNT(SClasses.StudentID) AS NumberCompleted, SUM(SClasses.Credits) AS TotalCredits, 
-         (CASE COUNT(SClasses.StudentID) 
-          WHEN 0 THEN 0 
+SELECT   Students.StudentID, Students.StudFirstName, Students.StudLastName,
+         COUNT(SClasses.StudentID) AS NumberCompleted, SUM(SClasses.Credits) AS TotalCredits,
+         (CASE COUNT(SClasses.StudentID)
+          WHEN 0 THEN 0
           ELSE ROUND(SUM(SClasses.Credits * SClasses.Grade) / SUM(SClasses.Credits), 3) END) AS GPA
 FROM     Students LEFT OUTER JOIN
             (SELECT Student_Schedules.StudentID, Student_Schedules.Grade, Classes.Credits
-             FROM   (Student_Schedules INNER JOIN Student_Class_Status 
-             ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus) 
-             INNER JOIN Classes 
+             FROM   (Student_Schedules INNER JOIN Student_Class_Status
+             ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus)
+             INNER JOIN Classes
              ON Student_Schedules.ClassID = Classes.ClassID
-             WHERE  (Student_Class_Status.ClassStatusDescription = 'Completed') 
-                AND (Student_Schedules.Grade >= 67)) AS SClasses 
+             WHERE  (Student_Class_Status.ClassStatusDescription = 'Completed')
+                AND (Student_Schedules.Grade >= 67)) AS SClasses
          ON Students.StudentID = SClasses.StudentID
 GROUP BY Students.StudentID, Students.StudFirstName, Students.StudLastName;
 
 
 CREATE VIEW CH19_Student_Mailing_List
 AS
-SELECT   Concat((CASE WHEN StudGender = 'M' THEN 'Mr. ' 
-                                WHEN StudMaritalStatus = 'S' 
-                                THEN 'Ms. ' ELSE 'Mrs. ' END), StudFirstName, ' ', StudLastName) AS NameLine, 
+SELECT   Concat((CASE WHEN StudGender = 'M' THEN 'Mr. '
+                                WHEN StudMaritalStatus = 'S'
+                                THEN 'Ms. ' ELSE 'Mrs. ' END), StudFirstName, ' ', StudLastName) AS NameLine,
                          StudStreetAddress AS StreetLine, Concat(StudCity, ', ', StudState, '  ', StudZipCode) AS CityLine
 FROM            Students;
 
 
 CREATE VIEW CH19_Student_Marital_Status
 AS
-SELECT        StudentID, StudFirstName, StudLastName, 
-                    (CASE StudMaritalStatus 
-                     WHEN 'M' THEN 'Married' 
-                     WHEN 'S' THEN 'Single' 
-                     WHEN 'W' THEN 'Widowed' 
+SELECT        StudentID, StudFirstName, StudLastName,
+                    (CASE StudMaritalStatus
+                     WHEN 'M' THEN 'Married'
+                     WHEN 'S' THEN 'Single'
+                     WHEN 'W' THEN 'Widowed'
                      WHEN 'D' THEN 'Divorced' ELSE 'Not Specified' END) AS Gender
 FROM          Students;
 
 
 CREATE VIEW CH19_Students_Classes_Letter_Grades
 AS
-SELECT  Students.StudentID, Students.StudFirstName, Students.StudLastName, Classes.ClassID, Classes.StartDate, Subjects.SubjectCode, 
-                   Subjects.SubjectName, Student_Schedules.Grade, 
-                   (CASE WHEN Grade BETWEEN 97 AND 100 THEN 'A+' 
-                         WHEN Grade BETWEEN 93 AND 96.99 THEN 'A' 
-                         WHEN Grade BETWEEN 90 AND 92.99 THEN 'A-' 
-                         WHEN Grade BETWEEN 87 AND 89.99 THEN 'B+' 
-                         WHEN Grade BETWEEN 83 AND 86.99 THEN 'B' 
-                         WHEN Grade BETWEEN 80 AND 82.99 THEN 'B-' 
-                         WHEN Grade BETWEEN 77 AND 79.99 THEN 'C+' 
-                         WHEN Grade BETWEEN 73 AND 76.99 THEN 'C' 
-                         WHEN Grade BETWEEN 70 AND 72.99 THEN 'C-' 
-                         WHEN Grade BETWEEN 67 AND 69.99 THEN 'D+' 
-                         WHEN Grade BETWEEN 63 AND 66.99 THEN 'D' 
-                         WHEN Grade BETWEEN 60 AND 62.99 THEN 'D-' 
+SELECT  Students.StudentID, Students.StudFirstName, Students.StudLastName, Classes.ClassID, Classes.StartDate, Subjects.SubjectCode,
+                   Subjects.SubjectName, Student_Schedules.Grade,
+                   (CASE WHEN Grade BETWEEN 97 AND 100 THEN 'A+'
+                         WHEN Grade BETWEEN 93 AND 96.99 THEN 'A'
+                         WHEN Grade BETWEEN 90 AND 92.99 THEN 'A-'
+                         WHEN Grade BETWEEN 87 AND 89.99 THEN 'B+'
+                         WHEN Grade BETWEEN 83 AND 86.99 THEN 'B'
+                         WHEN Grade BETWEEN 80 AND 82.99 THEN 'B-'
+                         WHEN Grade BETWEEN 77 AND 79.99 THEN 'C+'
+                         WHEN Grade BETWEEN 73 AND 76.99 THEN 'C'
+                         WHEN Grade BETWEEN 70 AND 72.99 THEN 'C-'
+                         WHEN Grade BETWEEN 67 AND 69.99 THEN 'D+'
+                         WHEN Grade BETWEEN 63 AND 66.99 THEN 'D'
+                         WHEN Grade BETWEEN 60 AND 62.99 THEN 'D-'
                          ELSE 'F' END) AS LetterGrade
-FROM    (((Students INNER JOIN Student_Schedules 
-        ON Students.StudentID = Student_Schedules.StudentID) 
-        INNER JOIN Classes 
-        ON Student_Schedules.ClassID = Classes.ClassID) 
-        INNER JOIN Subjects 
-        ON Classes.SubjectID = Subjects.SubjectID) 
-        INNER JOIN Student_Class_Status 
+FROM    (((Students INNER JOIN Student_Schedules
+        ON Students.StudentID = Student_Schedules.StudentID)
+        INNER JOIN Classes
+        ON Student_Schedules.ClassID = Classes.ClassID)
+        INNER JOIN Subjects
+        ON Classes.SubjectID = Subjects.SubjectID)
+        INNER JOIN Student_Class_Status
         ON Student_Schedules.ClassStatus = Student_Class_Status.ClassStatus
 WHERE   (Student_Class_Status.ClassStatusDescription = 'Completed');
 
 
 CREATE VIEW CH20_Class_Schedule_Calendar
-AS 
+AS
 SELECT ztblSemesterDays.SemesterNo, ztblSemesterDays.SemDate, Classes.StartTime, ztblSemesterDays.SemDayName, Subjects.SubjectCode, Subjects.SubjectName, Class_Rooms.BuildingCode, Class_Rooms.ClassRoomID
 FROM ztblSemesterDays, (Subjects
 INNER JOIN Classes
 ON Subjects.SubjectID=Classes.SubjectID)
 INNER JOIN Class_Rooms
 ON Class_Rooms.ClassRoomID=Classes.ClassRoomID
-WHERE Classes.SemesterNumber=ztblSemesterDays.SemesterNo And Classes.StartDate<=ztblSemesterDays.SemDate 
-AND 1 = (CASE WHEN ztblSemesterDays.SemDayName='Monday' And Classes.MondaySchedule<>0 THEN 1 
+WHERE Classes.SemesterNumber=ztblSemesterDays.SemesterNo And Classes.StartDate<=ztblSemesterDays.SemDate
+AND 1 = (CASE WHEN ztblSemesterDays.SemDayName='Monday' And Classes.MondaySchedule<>0 THEN 1
               WHEN ztblSemesterDays.SemDayName='Tuesday' And Classes.TuesdaySchedule<>0 THEN 1
-              WHEN ztblSemesterDays.SemDayName='Wednesday' And Classes.WednesdaySchedule<>0 THEN 1 
-              WHEN ztblSemesterDays.SemDayName='Thursday' And Classes.ThursdaySchedule<>0 THEN 1 
-              WHEN ztblSemesterDays.SemDayName='Friday' And Classes.FridaySchedule<>0 THEN 1 
+              WHEN ztblSemesterDays.SemDayName='Wednesday' And Classes.WednesdaySchedule<>0 THEN 1
+              WHEN ztblSemesterDays.SemDayName='Thursday' And Classes.ThursdaySchedule<>0 THEN 1
+              WHEN ztblSemesterDays.SemDayName='Friday' And Classes.FridaySchedule<>0 THEN 1
               WHEN ztblSemesterDays.SemDayName='Saturday' And Classes.SaturdaySchedule<>0 THEN 1 ELSE 0 END)
-ORDER BY ztblSemesterDays.SemesterNo, ztblSemesterDays.SemDate, Subjects.SubjectCode, 
+ORDER BY ztblSemesterDays.SemesterNo, ztblSemesterDays.SemDate, Subjects.SubjectCode,
   Class_Rooms.BuildingCode, Class_Rooms.ClassRoomID, Classes.StartTime;
 
 
 CREATE VIEW CH20_English_Student_Quintiles
-AS 
-SELECT S1.SubjectID, S1.StudFirstName, S1.StudLastName, S1.ClassStatus, S1.Grade, 
-  S1.CategoryID, S1.SubjectName, S1.RankInCategory, StudCount.NumStudents, 
-  (CASE WHEN RankInCategory<=0.2*NumStudents THEN 'First' 
-        WHEN RankInCategory<=0.4*NumStudents THEN 'Second' 
-        WHEN RankInCategory<=0.6*NumStudents THEN 'Third' 
+AS
+SELECT S1.SubjectID, S1.StudFirstName, S1.StudLastName, S1.ClassStatus, S1.Grade,
+  S1.CategoryID, S1.SubjectName, S1.RankInCategory, StudCount.NumStudents,
+  (CASE WHEN RankInCategory<=0.2*NumStudents THEN 'First'
+        WHEN RankInCategory<=0.4*NumStudents THEN 'Second'
+        WHEN RankInCategory<=0.6*NumStudents THEN 'Third'
         WHEN RankInCategory<=0.8*NumStudents THEN 'Fourth' ELSE 'Fifth' END) AS Quintile
-FROM 
-(SELECT Subjects.SubjectID, Students.StudFirstName, Students.StudLastName, 
-        Student_Schedules.ClassStatus, Student_Schedules.Grade, Subjects.CategoryID, Subjects.SubjectName, 
-        (SELECT Count(*) 
-         FROM (Classes INNER JOIN Student_Schedules AS SS2    
-           ON Classes.ClassID = SS2.ClassID)  
-         INNER JOIN Subjects As S3  
-           ON S3.SubjectID = Classes.SubjectID 
+FROM
+(SELECT Subjects.SubjectID, Students.StudFirstName, Students.StudLastName,
+        Student_Schedules.ClassStatus, Student_Schedules.Grade, Subjects.CategoryID, Subjects.SubjectName,
+        (SELECT Count(*)
+         FROM (Classes INNER JOIN Student_Schedules AS SS2
+           ON Classes.ClassID = SS2.ClassID)
+         INNER JOIN Subjects As S3
+           ON S3.SubjectID = Classes.SubjectID
          WHERE S3.CategoryID = 'ENG'
-           AND SS2.Grade >= Student_Schedules.Grade) AS RankInCategory 
+           AND SS2.Grade >= Student_Schedules.Grade) AS RankInCategory
 FROM ((Subjects INNER JOIN Classes
   ON Subjects.SubjectID = Classes.SubjectID)
-INNER JOIN Student_Schedules 
+INNER JOIN Student_Schedules
   ON Student_Schedules.ClassID = Classes.ClassID)
 INNER JOIN Students
-  ON Students.StudentID=Student_Schedules.StudentID 
-WHERE Student_Schedules.ClassStatus=2 And Subjects.CategoryID='ENG')  AS S1, 
-(SELECT Count(*) AS NumStudents 
+  ON Students.StudentID=Student_Schedules.StudentID
+WHERE Student_Schedules.ClassStatus=2 And Subjects.CategoryID='ENG')  AS S1,
+(SELECT Count(*) AS NumStudents
 FROM (Classes AS C2 INNER JOIN Student_Schedules AS SS3
   ON C2.ClassID=SS3.ClassID)
 INNER JOIN Subjects AS S2
-  ON S2.SubjectID=C2.SubjectID 
+  ON S2.SubjectID=C2.SubjectID
 WHERE SS3.ClassStatus=2 And S2.CategoryID='ENG')  AS StudCount
 ORDER BY S1.Grade DESC;
 
 
 CREATE VIEW CH20_Staff_Proficiency_Ratings
-AS 
+AS
 SELECT StfRatings.StaffID, StfRatings.StfFirstName, StfRatings.StfLastName, StfRatings.Title, StfRatings.AvgRating, ztblProfRatings.ProfRatingDesc
-FROM ztblProfRatings, 
-  (SELECT Staff.StaffID, Staff.StfFirstName, Staff.StfLastname, Faculty.Title, Avg(Faculty_Subjects.ProficiencyRating) AS AvgRating 
-   FROM (Staff INNER JOIN Faculty 
+FROM ztblProfRatings,
+  (SELECT Staff.StaffID, Staff.StfFirstName, Staff.StfLastname, Faculty.Title, Avg(Faculty_Subjects.ProficiencyRating) AS AvgRating
+   FROM (Staff INNER JOIN Faculty
      ON Staff.StaffID=Faculty.StaffID)
    INNER JOIN Faculty_Subjects
-    ON Faculty.StaffID=Faculty_Subjects.StaffID 
+    ON Faculty.StaffID=Faculty_Subjects.StaffID
    GROUP BY Staff.StaffID, Staff.StfFirstName, Staff.StfLastname, Faculty.Title)  AS StfRatings
 WHERE StfRatings.AvgRating BETWEEN ztblProfRatings.ProfRatingLow
 AND ztblProfRatings.ProfRatingHigh;
 
 
 CREATE VIEW CH20_Student_Crosstab_Gender_MaritalStatus
-AS 
-SELECT Students.StudState, Sum(Male*Married) AS MarriedMale, Sum(Male*Single) AS SingleMale, Sum(Male*Widowed) AS WidowedMale, Sum(Male*Divorced) AS DivorcedMale, 
-  Sum(Female*Married) AS MarriedFemale, Sum(Female*Single) AS SingleFemale, Sum(Female*Widowed) AS WidowedFemale, Sum(Female*Divorced) AS DivorcedFemale, 
-  Sum((Male*Married)+(Male*Single)+(Male*Widowed)+(Male*Divorced)) AS StateMaleTotal, 
-  Sum((Female*Married)+(Female*Single)+(Female*Widowed)+(Female*Divorced)) AS StateFemaleTotal, 
+AS
+SELECT Students.StudState, Sum(Male*Married) AS MarriedMale, Sum(Male*Single) AS SingleMale, Sum(Male*Widowed) AS WidowedMale, Sum(Male*Divorced) AS DivorcedMale,
+  Sum(Female*Married) AS MarriedFemale, Sum(Female*Single) AS SingleFemale, Sum(Female*Widowed) AS WidowedFemale, Sum(Female*Divorced) AS DivorcedFemale,
+  Sum((Male*Married)+(Male*Single)+(Male*Widowed)+(Male*Divorced)) AS StateMaleTotal,
+  Sum((Female*Married)+(Female*Single)+(Female*Widowed)+(Female*Divorced)) AS StateFemaleTotal,
   Sum(((Male*Married)+(Male*Single)+(Male*Widowed)+(Male*Divorced))+((Female*Married)+(Female*Single)+(Female*Widowed)+(Female*Divorced))) AS StateTotal
 FROM (Students
 INNER JOIN ztblMaritalStatusMatrix
@@ -855,9 +855,9 @@ GROUP BY Students.StudState;
 
 
 CREATE VIEW CH20_Student_Mailing_Skip_2
-AS 
+AS
 SELECT ' ' AS StudFirstName, ' ' AS StudLastName, ' ' AS StudStreetAddress, ' ' AS StudCity, ' ' AS StudState, ' ' AS StudZipCode
-FROM ztblSeqNumbers 
+FROM ztblSeqNumbers
 WHERE ztblSeqNumbers.Sequence <= 2
 UNION ALL SELECT Students.StudFirstName, Students.StudLastName, Students.StudStreetAddress, Students.StudCity, Students.StudState, Students.StudZipCode
 FROM Students
@@ -865,26 +865,26 @@ ORDER BY StudZipCode, StudLastName;
 
 
 CREATE VIEW CH20_Students_Additional_Courses
-AS 
-SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName, Subjects.SubjectID, 
+AS
+SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName, Subjects.SubjectID,
   Subjects.CategoryID, Subjects.SubjectCode, Subjects.SubjectName, Subjects.SubjectPreReq
 FROM Students, Subjects
 INNER JOIN Classes
 ON Subjects.SubjectID=Classes.SubjectID
-WHERE Subjects.SubjectID Not In  
-  (SELECT Su2.SubjectID  
-   FROM (Subjects AS Su2 INNER JOIN Classes 
-     ON Su2.SubjectID = Classes.SubjectID) 
-   INNER JOIN Student_Schedules 
-     ON Classes.ClassID = Student_Schedules.ClassID 
+WHERE Subjects.SubjectID Not In
+  (SELECT Su2.SubjectID
+   FROM (Subjects AS Su2 INNER JOIN Classes
+     ON Su2.SubjectID = Classes.SubjectID)
+   INNER JOIN Student_Schedules
+     ON Classes.ClassID = Student_Schedules.ClassID
    WHERE Student_Schedules.StudentID = Students.StudentID
      AND Student_Schedules.ClassStatus IN (1,2))
 ORDER BY Students.StudentID, Subjects.SubjectID;
 
 
 CREATE VIEW CH20_Students_Classes_Letter_Grades
-AS 
-SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName, Classes.ClassID, Classes.StartDate, 
+AS
+SELECT Students.StudentID, Students.StudFirstName, Students.StudLastName, Classes.ClassID, Classes.StartDate,
   Subjects.SubjectCode, Subjects.SubjectName, Student_Schedules.Grade, ztblLetterGrades.LetterGrade
 FROM ztblLetterGrades, (((Students
 INNER JOIN Student_Schedules
@@ -895,8 +895,6 @@ INNER JOIN Subjects
 ON Classes.SubjectID=Subjects.SubjectID)
 INNER JOIN Student_Class_Status
 ON Student_Schedules.ClassStatus=Student_Class_Status.ClassStatus
-WHERE (Student_Class_Status.ClassStatusDescription='Completed') 
-  AND (Student_Schedules.Grade Between ztblLetterGrades.LowGradePoint 
+WHERE (Student_Class_Status.ClassStatusDescription='Completed')
+  AND (Student_Schedules.Grade Between ztblLetterGrades.LowGradePoint
   AND ztblLetterGrades.HighGradePoint);
-
-

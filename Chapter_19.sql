@@ -192,9 +192,64 @@ select
 from
     Products P;
 -----------------------------------------------------------------
+/*
+“Display products and a sale rating based on number sold (poor
+<= 200 sales, Average > 200 and <= 500, Good > 500 and <= 1000,
+Excellent > 1000).”
+*/
+select
+    P.ProductNumber,
+    P.ProductName,
+    case
+        when sum(OD.QuantityOrdered) > 1000
+            then "Excellent"
+        when sum(OD.QuantityOrdered) > 500
+            then "Good"
+        when sum(OD.QuantityOrdered) > 200
+            then "Average"
+        else
+            "Poor"
+    end as Rating
+from
+    Products P
+left join
+    Order_Details OD
+    on P.ProductNumber = OD.ProductNumber
+group by
+    P.ProductNumber,
+    P.ProductName;
 -----------------------------------------------------------------
+use EntertainmentAgencyExample;
 -----------------------------------------------------------------
+/*
+“List entertainers and display whether the entertainer was
+booked on Christmas 2017 (December 25).”
+*/
+select
+    E.EntertainerID,
+    E.EntStageName,
+    case
+        when E.EntertainerID in (
+            select
+                EN.EntertainerID
+            from
+                Engagements EN
+            where
+                EN.StartDate <= cast('2017-12-25' as date)
+                and
+                EN.EndDate >= cast('2017-12-25' as date)
+        )
+            then "Booked"
+        else
+            "Not booked"
+        end as "Is booked on 2017-12-25"
+from
+    Entertainers E;
 -----------------------------------------------------------------
+/*
+“Find customers who like Jazz but not Standards (using Searched
+CASE in the WHERE clause).”
+*/
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 -----------------------------------------------------------------
