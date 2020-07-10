@@ -250,13 +250,186 @@ from
 “Find customers who like Jazz but not Standards (using Searched
 CASE in the WHERE clause).”
 */
+select
+    C.CustomerID,
+    C.CustFirstName,
+    C.CustLastName
+from
+    Customers C
+where
+    1 = (
+        case
+            when C.CustomerID not in (
+                select
+                    MP1.CustomerID
+                from
+                    Musical_Preferences MP1
+                inner join
+                    Musical_Styles MS1
+                    on MP1.StyleID = MS1.StyleID
+                where
+                    MS1.StyleName = "Jazz"
+            )
+                then 0
+            when C.CustomerID in (
+                select
+                    MP1.CustomerID
+                from
+                    Musical_Preferences MP1
+                inner join
+                    Musical_Styles MS1
+                    on MP1.StyleID = MS1.StyleID
+                where
+                    MS1.StyleName = "Standards"
+            )
+                then 0
+            else 1
+        end
+    );
 -----------------------------------------------------------------
+use SchoolSchedulingExample;
 -----------------------------------------------------------------
+/*
+“Show what new salaries for full-time faculty would be if you
+gave a 5 percent raise to instructors, a 4 percent raise to
+associate professors, and a 3.5 percent raise to professors.”
+*/
+select
+    S.StaffID,
+    S.StfFirstName,
+    S.StfLastname,
+    S.Salary as "Old Salary",
+    case
+        when F.Title = "Instructor"
+            then S.Salary * 1.05
+        when F.Title = "Associate Professors"
+            then S.Salary * 1.04
+        else
+            S.Salary * 1.035
+    end as "New Salary"
+from
+    Staff S
+inner join
+    Faculty F
+    on F.StaffID = S.StaffID
+where
+    F.Status = "Full Time";
 -----------------------------------------------------------------
+/*
+“List all students, the classes for which they enrolled, the
+grade they received, and a conversion of the grade number to a
+letter.”
+*/
+select
+    S.StudentID,
+    S.StudFirstName,
+    S.StudLastName,
+    C.ClassID,
+    SU.SubjectName,
+    SS.Grade,
+    case
+        when SS.Grade >= 97
+            then 'A+'
+        when SS.Grade >= 93
+            then 'A'
+        when SS.Grade >= 90
+            then 'A-'
+        when SS.Grade >= 87
+            then 'B+'
+        when SS.Grade >= 83
+            then 'B'
+        when SS.Grade >= 80
+            then 'B-'
+        when SS.Grade >= 77
+            then 'C+'
+        when SS.Grade >= 73
+            then 'C'
+        when SS.Grade >= 70
+            then 'C-'
+        when SS.Grade >= 67
+            then 'D+'
+        when SS.Grade >= 63
+            then 'D'
+        when SS.Grade  >= 60
+            then 'D-'
+        else
+            'F'
+    end as "Letter Grade"
+from
+    Students S
+inner join
+    Student_Schedules SS
+    on S.StudentID = SS.StudentID
+inner join
+    Classes C
+    on C.ClassID = SS.ClassID
+inner join
+    Subjects SU
+    on SU.SubjectID = C.SubjectID
+inner join
+    Student_Class_Status SCS
+    on SCS.ClassStatus = SS.ClassStatus
+where
+    SCS.ClassStatusDescription = "Completed";
 -----------------------------------------------------------------
+use BowlingLeagueExample;
 -----------------------------------------------------------------
+/*
+“List Bowlers and display ‘fair’ (average < 140), ‘average’
+(average >= 140 and < 160), ‘good’ (average >= 160 and < 185),
+‘excellent’ (average >= 185).”
+*/
+select
+    B.BowlerID,
+    B.BowlerFirstName,
+    B.BowlerLastName,
+    avg(BS.RawScore) as "Avg Score",
+    case
+        when avg(BS.RawScore)  >= 185
+            then "excellent"
+        when avg(BS.RawScore)  >= 160
+            then "good"
+        when avg(BS.RawScore)  >= 140
+            then "average"
+        else
+            "fair"
+    end as Level
+from
+    Bowlers B
+inner join
+    Bowler_Scores BS
+    on B.BowlerID = BS.BowlerID
+group by
+    B.BowlerID,
+    B.BowlerFirstName,
+    B.BowlerLastName;
 -----------------------------------------------------------------
------------------------------------------------------------------
+/*
+“Show all tournaments with either their match details or ‘Not
+Played Yet.’”
+*/
+???
+select
+    T.TourneyID,
+    T.TourneyDate,
+    T.TourneyLocation,
+    case
+        when TM.TourneyID is null
+            then "Not Played Yet"
+        else
+            concat("Match: ", cast(TM.MatchID as character), " Lanes: ",   TM.Lanes, " Odd Lane Team: ", T1.TeamName, " Even Lane Team: ", T2.TeamName)
+    end as MatchInfo
+from
+    (Tournaments T
+left join
+    Tourney_Matches TM
+    on T.TourneyID = TM.TourneyID)
+inner join
+    Teams T1
+    on T1.TeamID = TM.OddLaneTeamID
+inner join
+    Teams T2
+    on T2.TeamID = TM.EvenLaneTeamID;
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 -----------------------------------------------------------------
