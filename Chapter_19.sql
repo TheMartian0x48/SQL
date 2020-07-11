@@ -408,36 +408,165 @@ group by
 “Show all tournaments with either their match details or ‘Not
 Played Yet.’”
 */
-???
 select
     T.TourneyID,
     T.TourneyDate,
     T.TourneyLocation,
     case
-        when TM.TourneyID is null
-            then "Not Played Yet"
-        else
-            concat("Match: ", cast(TM.MatchID as character), " Lanes: ",   TM.Lanes, " Odd Lane Team: ", T1.TeamName, " Even Lane Team: ", T2.TeamName)
-    end as MatchInfo
+      when TM.TourneyID is null
+        then 'Not PLayerd yet'
+      else
+        concat("Match : ", cast(TM.MatchID as char),
+        ' Lanes ', TM.Lanes, ' OddLaneTeam : ', T1.TeamName,
+        ' EvenLaneTeam : ', T2.TeamName)
+    end as MatchDetails
 from
-    (Tournaments T
+    Tournaments T
 left join
-    Tourney_Matches TM
-    on T.TourneyID = TM.TourneyID)
+    (Tourney_Matches as TM
 inner join
-    Teams T1
+    Teams as T1
     on T1.TeamID = TM.OddLaneTeamID
 inner join
-    Teams T2
-    on T2.TeamID = TM.EvenLaneTeamID;
+    Teams as T2
+    on T2.TeamID = TM.EvenLaneTeamID)
+    on T.TourneyID = TM.TourneyID;
 -----------------------------------------------------------------
+                    P R O B L E M S
 -----------------------------------------------------------------
+use SalesOrdersExample;
 -----------------------------------------------------------------
+/*
+“Show all customers and display whether they placed an order in
+the first week of December 2017.”
+*/
+select
+  C.CustomerID,
+  C.CustFirstName,
+  C.CustLastName,
+  case
+    when C.CustomerID in (
+      select
+        O.CustomerID
+      from
+        Orders O
+      where
+        O.OrderDate between cast('2017-12-01' as date) and
+        cast('2017-12-07' as date))
+      then
+        "Ordered"
+    else
+      "Not Ordered"
+  end as HasOrdered
+from
+  Customers C;
 -----------------------------------------------------------------
+/*
+“List customers and the state they live in spelled out.”
+*/
+select
+  C.CustomerID,
+  C.CustFirstName,
+  C.CustLastName,
+  case
+    when C.CustState = 'WA'
+      then  'Washington'
+    when C.CustState = 'OR'
+      then 'Oregon'
+    when C.CustState = 'TX'
+      then 'Texas'
+    else
+      'California'
+  end as State
+from
+  Customers C;
 -----------------------------------------------------------------
+/*
+“Display employees and their age as of February 15, 2018.”
+*/
+select
+  E.EmployeeID,
+  E.EmpFirstName,
+  E.EmpLastName,
+  year(cast('2018-02-15' as date)) - year(E.EmpBirthDate) -
+  case
+    when month(E.EmpBirthDate) > 2
+      then 1
+    when day(E.EmpBirthDate) > 15
+      then 1
+    else
+      0
+  end as Age
+from
+  Employees E;
 -----------------------------------------------------------------
+use EntertainmentAgencyExample;
 -----------------------------------------------------------------
+/*
+“Display Customers and their preferred styles, but change 50’s,
+60’s, 70’s, and 80’s music to ‘Oldies’.”
+*/
+select
+  C.CustomerID,
+  C.CustFirstName,
+  C.CustLastName,
+  case
+    when MS.StyleName in ("80's Music", "70's Music",
+        "60's Music", "50's Music")
+      then
+        "Oldies"
+    else
+      MS.StyleName
+  end as PreferredStyle
+from
+  Customers C
+inner join
+  Musical_Preferences MP
+  on MP.CustomerID = C.CustomerID
+inner join
+  Musical_Styles MS
+  on MS.StyleID = MP.StyleID;
 -----------------------------------------------------------------
+/*
+“Find Entertainers who play Jazz but not Contemporary musical
+styles.”
+*/
+select
+  E.EntertainerID,
+  E.EntStageName
+from
+  Entertainers E
+where
+  1 =
+  case
+    when E.EntertainerID not in
+      (
+        select
+          ES1.EntertainerID
+        from
+          Entertainer_Styles ES1
+        inner join
+          Musical_Styles MS1
+          on ES1.StyleID = MS1.StyleID
+        where
+          MS1.StyleName = 'Jazz'
+      )
+      then 0
+    when E.EntertainerID in
+      (
+        select
+          ES2.EntertainerID
+        from
+          Entertainer_Styles ES2
+        inner join
+          Musical_Styles MS2
+          on ES2.StyleID = MS2.StyleID
+        where
+          MS2.StyleName = 'Contemporary'
+      )
+      then 0
+    else 1
+    end;
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 -----------------------------------------------------------------
