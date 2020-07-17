@@ -568,29 +568,82 @@ where
     else 1
     end;
 -----------------------------------------------------------------
+use SchoolSchedulingExample;
 -----------------------------------------------------------------
+/*
+“Display student Marital Status based on a code.”
+*/
+select
+  S.StudentID,
+  S.StudFirstName,
+  S.StudLastName,
+  case
+    when S.StudMaritalStatus = 'M'
+      then "Married"
+    when S.StudMaritalStatus = 'S'
+      then "Single"
+    when S.StudMaritalStatus = 'D'
+      then "Divorced"
+    else
+      "Widowed"
+  end as "Martial Status"
+from
+  Students S;
 -----------------------------------------------------------------
+/*
+“Calculate student age as of November 15, 2017.”
+*/
+select
+  S.StudentID,
+  S.StudFirstName,
+  S.StudLastName,
+  (year(cast('2012-11-15' as date)) - year(S.StudBirthDate) -
+    case
+      when month(S.StudBirthDate) < 11
+        then 0
+      when month(S.StudBirthDate) > 11
+        then 1
+      when day(S.StudBirthDate) > 15
+        then 1
+      else
+        0
+    end) as "Age"
+from
+  Students S;
 -----------------------------------------------------------------
+use BowlingLeagueExample;
 -----------------------------------------------------------------
+/*
+“List all bowlers and calculate their averages using the sum of
+pins divided by games played, but avoid a divide by zero error.”
+*/
+select
+  B.BowlerID,
+  B.BowlerFirstName,
+  B.BowlerLastName,
+  count(*) as Played,
+  sum(BS.RawScore) as Pins,
+  case
+    when BS.BowlerID is null
+      then 0
+    else
+      round(sum(BS.RawScore) / count(*), 0)
+  end as Avg
+from
+  Bowlers B
+left join
+  Bowler_Scores BS
+  on B.BowlerID = BS.BowlerID
+group by
+  B.BowlerID,
+  B.BowlerFirstName,
+  B.BowlerLastName;
 -----------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
+/*
+“List tournament date, tournament location, match number, teams
+on the odd and even lanes, game number, and either the winner or
+‘Match not played.’”
+*/
+???
 -----------------------------------------------------------------
 -----------------------------------------------------------------
